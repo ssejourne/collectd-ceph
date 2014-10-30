@@ -95,7 +95,39 @@ class Base(object):
         self.logdebug("dispatching value %s.%s.%s.%s=%s"
                 % (plugin, plugin_instance, type, type_instance, value))
 
-        val = collectd.Values(type='gauge')
+#        val = collectd.Values(type='gauge')
+
+# Fix to group data types. To be defined in types.db
+# total_avail, total_space, total_used = ceph_capacity              value:GAUGE:0:U
+# avg_latency, max_latency, min_latency = ceph_latency            value:GAUGE:0:U
+# read_bytes_sec, write_bytes_sec = ceph_bps               value:GAUGE:0:U
+# op_per_sec = ceph_ops                value:GAUGE:0:U
+# objects = ceph_obj                value:GAUGE:0:U
+# bytes_used = ceph_bused              value:GAUGE:0:U
+# kb_used = ceph_kbused             value:GAUGE:0:U
+# in, out, up, down = ceph_osd             value:GAUGE:0:U
+
+        if ((type == 'write_bytes_sec') or (type == 'read_bytes_sec')):
+            val = collectd.Values(type='ceph_bsec')
+        elif type == 'bytes_used':
+            val = collectd.Values(type='ceph_bused')
+        elif type == 'op_per_sec':
+            val = collectd.Values(type='ceph_ops')
+        elif type == 'objects':
+            val = collectd.Values(type='ceph_obj')
+        elif type == 'kb_used':
+            val = collectd.Values(type='ceph_kbused')
+        elif ((type == 'total_avail') or (type == 'total_space') or (type == 'total_space') or (type == 'total_used')):
+            val = collectd.Values(type='ceph_capacity')
+        elif ((type == 'avg_latency') or (type == 'max_latency') or (type == 'min_latency') or (type == 'stddev_latency')):
+            val = collectd.Values(type='ceph_latency')
+        elif ((type == 'up') or (type == 'down') or (type == 'in') or (type == 'out')):
+            val = collectd.Values(type='ceph_osd')
+        elif ((type == 'active') or (type == 'clean') or (type == 'scrubbing')):
+            val = collectd.Values(type='ceph_pg')
+        else:
+            val = collectd.Values(type='gauge')
+        
         val.plugin=plugin
         val.plugin_instance=plugin_instance
         if type_instance is not None:
